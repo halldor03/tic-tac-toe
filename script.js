@@ -18,14 +18,34 @@ const gameBoard = (() => {
 gameBoard.populate();
 
 const gameFlow = (() => {
+  let currentMarker = crosses.marker;
   const placeMarker = () =>
-    selectBoxes.forEach((box) => box.addEventListener("click", selectMarker));
-  const selectMarker = (e) => {
-    index = e.target.dataset.nr - 1;
-    console.log(gameBoard.markers);
-    gameBoard.markers[index] = circles.marker;
-    gameBoard.populate();
+    selectBoxes.forEach((box) =>
+      box.addEventListener("click", (e) => {
+        changeText();
+        index = e.target.dataset.nr;
+        console.log(gameBoard.markers);
+        if (gameBoard.markers.every((element) => element === "")) {
+          gameBoard.markers[index] = crosses.marker;
+        } else gameBoard.markers[index] = currentMarker;
+        console.log(currentMarker);
+        changeMarker();
+        changeText();
+        console.log(currentMarker);
+        gameBoard.populate();
+        console.log(gameBoard.markers);
+      })
+    );
+  const changeMarker = () => {
+    if (currentMarker === crosses.marker) {
+      return (currentMarker = circles.marker);
+    } else currentMarker = crosses.marker;
   };
-  return { placeMarker };
+  const changeText = () => {
+    const text = document.querySelector(".playerText");
+    text.innerHTML = currentMarker;
+  };
+  return { placeMarker, changeText };
 })();
 gameFlow.placeMarker();
+gameFlow.changeText();
