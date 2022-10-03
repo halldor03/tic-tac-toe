@@ -1,5 +1,5 @@
 const selectBoxes = document.querySelectorAll("[class*=box]");
-const playerText = document.querySelector(".playerText");
+const gameText = document.querySelector(".gameText");
 const resetButton = document.querySelector(".restartButton");
 
 const player = (name, marker) => {
@@ -26,19 +26,15 @@ const gameFlow = (() => {
   const placeMarker = (e) => {
     changeText();
     const marker = e.target.dataset.nr;
-    // console.log(gameBoard.markers);
     if (gameBoard.markers.every((element) => element === "")) {
       gameBoard.markers[marker] = crosses.marker;
     } else gameBoard.markers[marker] = currentMarker;
-    // console.log(currentMarker);
     changeMarker();
     changeText();
-    // console.log(currentMarker);
     gameBoard.populate();
-    // console.log(gameBoard.markers);
     const currentBox = e.target;
     currentBox.removeEventListener("click", placeMarker);
-    checkWinConditions();
+    winConditions.check();
   };
   const changeMarker = () => {
     if (currentMarker === crosses.marker) {
@@ -46,67 +42,77 @@ const gameFlow = (() => {
     } else currentMarker = crosses.marker;
   };
   const changeText = () => {
-    playerText.innerHTML = currentMarker;
+    gameText.innerHTML = "Player " + currentMarker + ", please make your move";
   };
   const restart = () => {
     const resetGrid = () => {
       gameBoard.markers.fill("");
       gameBoard.populate();
       currentMarker = crosses.marker;
-      playerText.innerHTML = currentMarker;
+      gameText.innerHTML =
+        "Player " + currentMarker + ", please make your move";
+      changeText();
       selectBoxes.forEach((box) => box.addEventListener("click", placeMarker));
     };
     resetButton.addEventListener("click", resetGrid);
-  };
-  const checkWinConditions = () => {
-    const winPattern = [
-      [1, 1, 1, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 1, 1, 1, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 1, 1, 1],
-      [1, 0, 0, 1, 0, 0, 1, 0, 0],
-      [0, 1, 0, 0, 1, 0, 0, 1, 0],
-      [0, 0, 1, 0, 0, 1, 0, 0, 1],
-      [1, 0, 0, 0, 1, 0, 0, 0, 1],
-      [0, 0, 1, 0, 1, 0, 1, 0, 0],
-    ];
-    const winningIndexesArray = (() => {
-      const patterns = () => {
-        winPattern.forEach((pattern) => {
-          const patternReduced = () => {
-            pattern.reduce((winningConditionIndexes, filter, winningIndex) => {
-              if (filter === 1) winningConditionIndexes.push(winningIndex);
-              return winningConditionIndexes;
-            }, []);
-            return patternReduced;
-          };
-        });
-      };
-      return { patterns };
-    })();
-    console.log(winningIndexesArray.patterns());
-
-    // const currentPlayerIndexesArray = gameBoard.markers.reduce(
-    //   (currentIndexes, filter, currentIndex) => {
-    //     if (filter === "X") currentIndexes.push(currentIndex);
-    //     return currentIndexes;
-    //   },
-    //   []
-    // );
-    // console.log(currentPlayerIndexesArray);
-
-    // if (
-    //   currentPlayerIndexesArray.includes(
-    //     winningIndexesArray[0] &&
-    //       winningIndexesArray[1] &&
-    //       winningIndexesArray[2]
-    //   ) &&
-    //   currentPlayerIndexesArray.length >= 3
-    // ) {
-    //   console.log("WIN");
-    // } else console.log("NOT WIN");
   };
   return { chooseBox, changeText, restart };
 })();
 gameFlow.chooseBox();
 gameFlow.changeText();
 gameFlow.restart();
+
+const winConditions = (() => {
+  const combination1 = [0, 1, 2];
+  const combination2 = [3, 4, 5];
+  const combination3 = [6, 7, 8];
+  const combination4 = [0, 3, 6];
+  const combination5 = [1, 4, 7];
+  const combination6 = [2, 5, 8];
+  const combination7 = [0, 4, 8];
+  const combination8 = [2, 4, 6];
+
+  const check = () => {
+    const XPlayerIndexes = gameBoard.markers.reduce(
+      (currentIndexes, filter, currentIndex) => {
+        if (filter === "X") currentIndexes.push(currentIndex);
+        return currentIndexes;
+      },
+      []
+    );
+    const OPlayerIndexes = gameBoard.markers.reduce(
+      (currentIndexes, filter, currentIndex) => {
+        if (filter === "O") currentIndexes.push(currentIndex);
+        return currentIndexes;
+      },
+      []
+    );
+
+    if (
+      combination1.every((element) => XPlayerIndexes.includes(element)) ||
+      combination2.every((element) => XPlayerIndexes.includes(element)) ||
+      combination3.every((element) => XPlayerIndexes.includes(element)) ||
+      combination4.every((element) => XPlayerIndexes.includes(element)) ||
+      combination5.every((element) => XPlayerIndexes.includes(element)) ||
+      combination6.every((element) => XPlayerIndexes.includes(element)) ||
+      combination7.every((element) => XPlayerIndexes.includes(element)) ||
+      combination8.every((element) => XPlayerIndexes.includes(element))
+    ) {
+      gameText.innerHTML = "Player X won! Press restart to play again";
+    } else if (
+      combination1.every((element) => OPlayerIndexes.includes(element)) ||
+      combination2.every((element) => OPlayerIndexes.includes(element)) ||
+      combination3.every((element) => OPlayerIndexes.includes(element)) ||
+      combination4.every((element) => OPlayerIndexes.includes(element)) ||
+      combination5.every((element) => OPlayerIndexes.includes(element)) ||
+      combination6.every((element) => OPlayerIndexes.includes(element)) ||
+      combination7.every((element) => OPlayerIndexes.includes(element)) ||
+      combination8.every((element) => OPlayerIndexes.includes(element))
+    ) {
+      gameText.innerHTML = "Player O won! Press restart to play again";
+    } else if (OPlayerIndexes.length + XPlayerIndexes.length === 9) {
+      gameText.innerHTML = "It's tie! Press restart to play again";
+    }
+  };
+  return { check };
+})();
