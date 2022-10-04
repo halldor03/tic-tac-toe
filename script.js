@@ -25,13 +25,13 @@ const gameFlow = (() => {
     selectBoxes.forEach((box) => box.addEventListener("click", placeMarker));
   const placeMarker = (e) => {
     changeText();
-    const marker = e.target.dataset.nr;
+    const index = e.target.dataset.nr;
     if (gameBoard.markers.every((element) => element === "")) {
-      gameBoard.markers[marker] = crosses.marker;
-    } else gameBoard.markers[marker] = currentMarker;
+      gameBoard.markers[index] = crosses.marker;
+    } else gameBoard.markers[index] = currentMarker;
+    gameBoard.populate();
     changeMarker();
     changeText();
-    gameBoard.populate();
     const currentBox = e.target;
     currentBox.removeEventListener("click", placeMarker);
     winConditions.check();
@@ -42,21 +42,21 @@ const gameFlow = (() => {
     } else currentMarker = crosses.marker;
   };
   const changeText = () => {
-    gameText.innerHTML = "Player " + currentMarker + ", please make your move";
+    gameText.innerHTML =
+      "Player " + currentMarker + ", please make your next move";
   };
   const restart = () => {
-    const resetGrid = () => {
+    resetButton.addEventListener("click", () => {
       gameBoard.markers.fill("");
       gameBoard.populate();
       currentMarker = crosses.marker;
       gameText.innerHTML =
-        "Player " + currentMarker + ", please make your move";
+        "Player " + currentMarker + ", please make your next move";
       changeText();
       selectBoxes.forEach((box) => box.addEventListener("click", placeMarker));
-    };
-    resetButton.addEventListener("click", resetGrid);
+    });
   };
-  return { chooseBox, changeText, restart };
+  return { chooseBox, changeText, restart, placeMarker };
 })();
 gameFlow.chooseBox();
 gameFlow.changeText();
@@ -71,7 +71,6 @@ const winConditions = (() => {
   const combination6 = [2, 5, 8];
   const combination7 = [0, 4, 8];
   const combination8 = [2, 4, 6];
-
   const check = () => {
     const XPlayerIndexes = gameBoard.markers.reduce(
       (currentIndexes, filter, currentIndex) => {
@@ -87,7 +86,6 @@ const winConditions = (() => {
       },
       []
     );
-
     if (
       combination1.every((element) => XPlayerIndexes.includes(element)) ||
       combination2.every((element) => XPlayerIndexes.includes(element)) ||
@@ -99,6 +97,9 @@ const winConditions = (() => {
       combination8.every((element) => XPlayerIndexes.includes(element))
     ) {
       gameText.innerHTML = "Player X won! Press restart to play again";
+      selectBoxes.forEach((box) =>
+        box.removeEventListener("click", gameFlow.placeMarker)
+      );
     } else if (
       combination1.every((element) => OPlayerIndexes.includes(element)) ||
       combination2.every((element) => OPlayerIndexes.includes(element)) ||
@@ -110,8 +111,14 @@ const winConditions = (() => {
       combination8.every((element) => OPlayerIndexes.includes(element))
     ) {
       gameText.innerHTML = "Player O won! Press restart to play again";
+      selectBoxes.forEach((box) =>
+        box.removeEventListener("click", gameFlow.placeMarker)
+      );
     } else if (OPlayerIndexes.length + XPlayerIndexes.length === 9) {
-      gameText.innerHTML = "It's tie! Press restart to play again";
+      gameText.innerHTML = "It's a tie! Press restart to play again";
+      selectBoxes.forEach((box) =>
+        box.removeEventListener("click", gameFlow.placeMarker)
+      );
     }
   };
   return { check };

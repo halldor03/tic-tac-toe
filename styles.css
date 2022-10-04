@@ -38,9 +38,10 @@ body {
 }
 
 .gameText {
-  font-size: 2rem;
+  font-size: 2.2rem;
   width: 20rem;
   text-align: center;
+  font-family: "Times New Roman", Times, serif;
 }
 
 .gridContainer {
